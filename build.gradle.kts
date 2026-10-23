@@ -171,21 +171,11 @@ dependencies {
 }
 
 /* Artifact publishing */
-nexusPublishing {
-    // OSSRH reaches EOL on June 30, 2025
-    // https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
-
-            val ossrhUsername: String by project
-            val ossrhPassword: String by project
-            username = ossrhUsername
-            password = ossrhPassword
-        }
-    }
-}
+// PATCH (wepwawet fork): REMOVED nexusPublishing { ... } block — this was
+// the io.github.gradle-nexus.publish-plugin DSL which we removed from the
+// plugins block above. JitPack doesn't need this (it uses Gradle's built-in
+// maven-publish plugin). Removing this block fixes the
+// 'Unresolved reference: sonatype/nexusUrl/ossrhUsername' errors.
 
 publishing {
     publications {
