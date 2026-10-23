@@ -96,6 +96,12 @@ class DepotDownloader @JvmOverloads constructor(
         val STAGING_DIR: Path = CONFIG_DIR.toPath() / "staging"
 
         private val SupportedWorkshopFileTypes: Set<EWorkshopFileType> = setOf(
+            // PATCH (wepwawet fork): include First (=0) because Steam sometimes returns
+            // fileType=0 for valid workshop items (e.g., Wallpaper Engine scenes return
+            // fileType=0 from the PublishedFile.GetDetails RPC even though the item has
+            // a valid fileUrl). Without this, the library logs "unsupported file type
+            // First. Skipping file" and the file is never downloaded.
+            EWorkshopFileType.First,
             EWorkshopFileType.Community,
             EWorkshopFileType.Art,
             EWorkshopFileType.Screenshot,
@@ -281,6 +287,18 @@ class DepotDownloader @JvmOverloads constructor(
     ) {
         val details = steam3!!.getPublishedFileDetails(appId, PublishedFileID(publishedFileId))
         val fileType = EWorkshopFileType.from(details!!.fileType)
+
+        // PATCH (wepwawet fork): log the actual response fields so we can see
+        // what Steam returned. Without this, we'd be guessing about whether
+        // fileUrl or hcontentFile is populated when fileType=0.
+        logger?.debug(
+            "processPublishedFile appId=$appId pubFile=$publishedFileId " +
+                "fileType=$fileType (${details.fileType}) " +
+                "fileUrl='${details.fileUrl}' " +
+                "filename='${details.filename}' " +
+                "hcontentFile=${details.hcontentFile} " +
+                "children=${details.childrenCount}"
+        )
 
         if (fileType == EWorkshopFileType.Collection) {
             details.childrenList.forEach { child ->
