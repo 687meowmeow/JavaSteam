@@ -5,7 +5,12 @@ import org.jmailen.gradle.kotlinter.tasks.FormatTask
 import org.jmailen.gradle.kotlinter.tasks.LintTask
 
 plugins {
-    `maven-publish`
+    // PATCH (wepwawet fork): REMOVED `maven-publish` from root plugins.
+    // On JitPack's Gradle 9.5.1, having `maven-publish` here conflicts with
+    // something else (likely the java-gradle-plugin in buildSrc) and fails
+    // with "Plugin with id 'org.gradle.maven-publish' was already requested
+    // at line 7". The subprojects each apply maven-publish themselves via
+    // id("maven-publish"), so the root project doesn't need it.
     alias(libs.plugins.kotlin.dokka)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kotlinter)
@@ -176,41 +181,11 @@ dependencies {
 // plugins block above. JitPack doesn't need this (it uses Gradle's built-in
 // maven-publish plugin). Removing this block fixes the
 // 'Unresolved reference: sonatype/nexusUrl/ossrhUsername' errors.
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-            artifact(javadocJar)
-            pom {
-                name = "JavaSteam"
-                packaging = "jar"
-                description = "Java library to interact with Valve's Steam network."
-                url = "https://github.com/Longi94/JavaSteam"
-                inceptionYear = "2018"
-                scm {
-                    connection = "scm:git:git://github.com/Longi94/JavaSteam.git"
-                    developerConnection = "scm:git:ssh://github.com:Longi94/JavaSteam.git"
-                    url = "https://github.com/Longi94/JavaSteam/tree/master"
-                }
-                licenses {
-                    license {
-                        name = "MIT License"
-                        url = "https://www.opensource.org/licenses/mit-license.php"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "Longi"
-                        name = "Long Tran"
-                        email = "lngtrn94@gmail.com"
-                    }
-                }
-            }
-        }
-    }
-}
-
-signing {
-    isRequired = false // PATCH (wepwawet fork): make signing optional for JitPack
-}
+//
+// ALSO REMOVED the root project's publishing { ... } and signing { ... }
+// blocks — they referenced maven-publish which we removed from the root
+// plugins block above (it was conflicting with buildSrc's java-gradle-plugin
+// auto-applied maven-publish). The subprojects each have their own
+// publishing { ... } and signing { ... } blocks, so the root doesn't need
+// them. The root project is just a container — it doesn't publish anything
+// itself.
