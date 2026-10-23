@@ -9,7 +9,13 @@ plugins {
     alias(libs.plugins.kotlin.dokka)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kotlinter)
-    alias(libs.plugins.maven.publish)
+    // PATCH (wepwawet fork): REMOVED alias(libs.plugins.maven.publish)
+    // This was the io.github.gradle-nexus.publish-plugin (for publishing to
+    // Maven Central via Sonatype). On JitPack, this plugin conflicts with
+    // the built-in `maven-publish` plugin (line 7) and the build fails with
+    // "Plugin with id 'org.gradle.maven-publish' was already requested".
+    // JitPack uses the built-in maven-publish plugin, so we don't need the
+    // nexus publish plugin here.
     alias(libs.plugins.protobuf.gradle)
     id("jacoco")
     id("signing")
@@ -216,5 +222,5 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["mavenJava"])
+    isRequired = false // PATCH (wepwawet fork): make signing optional for JitPack
 }
