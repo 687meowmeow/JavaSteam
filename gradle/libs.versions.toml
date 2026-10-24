@@ -17,7 +17,10 @@ ktor = "3.3.3" # https://mvnrepository.com/artifact/io.ktor/ktor-client-cio
 # PATCH (wepwawet fork): pinned ktor to 3.3.3 (matches upstream JavaSteam 1.8.0
 # release). The master branch's ktor 3.5.0 pulls in okhttp-android 5.4.0 which
 # requires compileSdk 36, but consumers of this library may be on compileSdk 35.
-okHttp = "5.4.0" # https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+okHttp = "4.12.0" # https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+# PATCH (wepwawet fork): pinned okHttp to 4.12.0 (matches upstream JavaSteam
+# 1.8.0 release). The master branch's okHttp 5.4.0 requires compileSdk 36,
+# but consumers of this library may be on compileSdk 35.
 protobuf = "4.35.1" # https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
 protobuf-gradle = "0.10.0" # https://mvnrepository.com/artifact/com.google.protobuf/protobuf-gradle-plugin
 publishPlugin = "2.0.0" # https://mvnrepository.com/artifact/io.github.gradle-nexus/publish-plugin
