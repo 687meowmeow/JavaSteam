@@ -65,5 +65,5 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["mavenJava"])
+    isRequired = false // PATCH (wepwawet fork): make signing optional for JitPack
 }
