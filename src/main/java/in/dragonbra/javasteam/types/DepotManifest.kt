@@ -409,7 +409,10 @@ class DepotManifest {
         val uniqueChunks = hashSetOf<ByteArrayKey>()
 
         // Reuse instance.
-        val sha1Digest = MessageDigest.getInstance("SHA-1", CryptoHelper.SEC_PROV)
+        // PATCH (wepwawet fork): removed explicit CryptoHelper.SEC_PROV ("BC") from
+        // SHA-1. On Android 14+ (API 36), the BC provider doesn't have SHA-1
+        // registered. SHA-1 is universally available in every JCE provider.
+        val sha1Digest = MessageDigest.getInstance("SHA-1")
 
         files.forEach { file ->
             val protofile = ContentManifestPayload.FileMapping.newBuilder().apply {

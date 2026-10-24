@@ -93,7 +93,13 @@ public class CryptoHelper {
             throw new IllegalArgumentException("input is null");
         }
 
-        MessageDigest sha = MessageDigest.getInstance("SHA-1", SEC_PROV);
+        // PATCH (wepwawet fork): removed explicit SEC_PROV ("BC") from SHA-1.
+        // On Android 14+ (API 36), the BC provider doesn't have SHA-1 registered
+        // (throws NoSuchAlgorithmException: no such algorithm: SHA-1 for provider BC).
+        // SHA-1 is universally available in every JCE provider (Conscrypt,
+        // AndroidOpenSSL, etc.), so we don't need BC for it. We DO need BC for
+        // AES with PKCS7Padding (below), but not for SHA-1.
+        MessageDigest sha = MessageDigest.getInstance("SHA-1");
         return sha.digest(input);
     }
 
