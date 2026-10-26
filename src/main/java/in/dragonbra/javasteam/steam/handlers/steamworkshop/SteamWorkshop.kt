@@ -199,11 +199,11 @@ class SteamWorkshop : ClientMsgHandler() {
             numperpage = details.numPerPage
             type = details.type
             sortmethod = details.sortMethod
-            addAllRequiredTags(details.requiredTags)
-            addAllExcludedTags(details.excludedTags)
+            addAllRequiredtags(details.requiredTags)
+            addAllExcludedtags(details.excludedTags)
             details.filetype?.let { filetype = it }
             idsOnly = details.idsOnly
-            totalOnly = details.totalOnly
+            totalonly = details.totalOnly
             returnVoteData = details.returnVoteData
             returnTags = details.returnTags
             returnKvTags = details.returnKvTags
