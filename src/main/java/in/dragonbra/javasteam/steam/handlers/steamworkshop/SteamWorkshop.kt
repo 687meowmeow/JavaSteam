@@ -4,6 +4,8 @@ import `in`.dragonbra.javasteam.base.ClientMsgProtobuf
 import `in`.dragonbra.javasteam.base.IPacketMsg
 import `in`.dragonbra.javasteam.enums.EMsg
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientserverUcm.CMsgClientUCMEnumeratePublishedFilesByUserAction
+import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesPublishedfileSteamclient.CPublishedFile_GetUserFiles_Request
+import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesPublishedfileSteamclient.CPublishedFile_GetUserFiles_Response
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesPublishedfileSteamclient.CPublishedFile_QueryFiles_Request
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesPublishedfileSteamclient.CPublishedFile_QueryFiles_Response
 import `in`.dragonbra.javasteam.rpc.service.PublishedFile
@@ -177,6 +179,50 @@ class SteamWorkshop : ClientMsgHandler() {
         }.build()
 
         return publishedFileService.queryFiles(request)
+    }
+
+    /**
+     * Queries a specific user's published workshop files via the
+     * `ISteamPublishedFile.GetUserFiles` service RPC. This bypasses HTTP rate
+     * limiting (Steam returns HTTP 429 after just a few profile-page scrapes).
+     *
+     * @param details The query parameters (including the creator's Steam ID64).
+     * @return The Job ID — await to get [ServiceMethodResponse]<[CPublishedFile_GetUserFiles_Response.Builder]>.
+     */
+    fun getUserFiles(
+        details: GetUserFilesDetails,
+    ): AsyncJobSingle<ServiceMethodResponse<CPublishedFile_GetUserFiles_Response.Builder>> {
+        val request = CPublishedFile_GetUserFiles_Request.newBuilder().apply {
+            steamid = details.steamId.toLong()
+            appid = details.appId
+            page = details.page
+            numperpage = details.numPerPage
+            type = details.type
+            sortmethod = details.sortMethod
+            addAllRequiredTags(details.requiredTags)
+            addAllExcludedTags(details.excludedTags)
+            details.filetype?.let { filetype = it }
+            idsOnly = details.idsOnly
+            totalOnly = details.totalOnly
+            returnVoteData = details.returnVoteData
+            returnTags = details.returnTags
+            returnKvTags = details.returnKvTags
+            returnPreviews = details.returnPreviews
+            returnShortDescription = details.returnShortDescription
+            returnForSaleData = details.returnForSaleData
+            returnMetadata = details.returnMetadata
+            returnChildren = details.returnChildren
+            details.requiredKvTags.forEach { (key, value) ->
+                addRequiredKvTags(
+                    CPublishedFile_GetUserFiles_Request.KVTag.newBuilder()
+                        .setKey(key)
+                        .setValue(value)
+                        .build()
+                )
+            }
+        }.build()
+
+        return publishedFileService.getUserFiles(request)
     }
 
     /**
