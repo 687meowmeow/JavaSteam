@@ -113,10 +113,10 @@ class SteamWorkshop : ClientMsgHandler() {
             page = details.page
             details.cursor?.let { cursor = it }
             numperpage = details.numPerPage
-            creatorAppId?.let { creatorAppid = it }
+            details.creatorAppId?.let { creatorAppid = it }
             appid = details.appId
-            addAllRequiredTags(details.requiredTags)
-            addAllExcludedTags(details.excludedTags)
+            addAllRequiredtags(details.requiredTags)
+            addAllExcludedtags(details.excludedTags)
             matchAllTags = details.matchAllTags
             addAllRequiredFlags(details.requiredFlags)
             addAllOmittedFlags(details.omittedFlags)
@@ -157,7 +157,7 @@ class SteamWorkshop : ClientMsgHandler() {
                     .build()
             }
             adminQuery = details.adminQuery
-            totalOnly = details.totalOnly
+            totalonly = details.totalOnly
             idsOnly = details.idsOnly
             returnVoteData = details.returnVoteData
             returnTags = details.returnTags
@@ -170,7 +170,9 @@ class SteamWorkshop : ClientMsgHandler() {
             details.returnPlaytimeStats?.let { returnPlaytimeStats = it.toInt() }
             returnDetails = details.returnDetails
             stripDescriptionBbcode = details.stripDescriptionBbcode
-            desiredRevision = details.desiredRevision.number
+            // For enum-typed proto fields, Java protobuf generates setXxx(Enum) overload.
+            // Pass the enum directly (not .number).
+            desiredRevision = details.desiredRevision
             returnReactions = details.returnReactions
         }.build()
 
