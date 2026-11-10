@@ -151,6 +151,28 @@ class WebSocketConnection :
 
     /**
      * Rudimentary watchdog
+     *
+     * v1.8.0-wepwawet13 (WallpaperSuite bug check): the threshold was 30
+     * seconds of NO INCOMING BINARY FRAMES. That was too aggressive:
+     *
+     *  1. `lastFrameTime` is only refreshed by incoming Binary CM frames.
+     *     WebSocket-level PING/PONG frames (handled inside ktor when
+     *     `pingInterval` is configured) do NOT refresh it, so transport
+     *     liveness and this watchdog measure different things.
+     *  2. The CMClient heartbeat interval is SERVER-CONTROLLED
+     *     (`legacyOutOfGameHeartbeatSeconds` from the logon response).
+     *     If Steam ever specifies an interval ≥ 30s, this watchdog would
+     *     disconnect perfectly healthy connections between heartbeats.
+     *  3. During depot downloads all bulk traffic flows over SEPARATE
+     *     steamcontent.com CDN connections; the CM socket can legitimately
+     *     go quiet for extended stretches while the download is healthy.
+     *
+     * Transport-level death is already detected by (a) the
+     * `client/session.isActive` checks above and (b) ktor's pingInterval
+     * ping/pong failure. This watchdog is the last-resort app-layer check,
+     * so it now fires at 5 MINUTES of total CM silence instead of 30s —
+     * still fast enough to give the user a clear error instead of a hang,
+     * but never fast enough to abort a healthy download.
      */
     private fun startConnectionMonitoring() {
         launch {
@@ -164,17 +186,17 @@ class WebSocketConnection :
 
                 // logger.debug("Watchdog status: $timeSinceLastFrame")
                 when {
-                    timeSinceLastFrame > 30000 -> {
-                        logger.error("Watchdog: No response for 30 seconds. Disconnecting from steam")
+                    timeSinceLastFrame > 300000 -> {
+                        logger.error("Watchdog: No response for 5 minutes. Disconnecting from steam")
                         disconnect(userInitiated = false)
                         break
                     }
 
-                    timeSinceLastFrame > 25000 -> logger.debug("Watchdog: No response for 25 seconds")
+                    timeSinceLastFrame > 250000 -> logger.debug("Watchdog: No response for 250 seconds")
 
-                    timeSinceLastFrame > 20000 -> logger.debug("Watchdog: No response for 20 seconds")
+                    timeSinceLastFrame > 200000 -> logger.debug("Watchdog: No response for 200 seconds")
 
-                    timeSinceLastFrame > 15000 -> logger.debug("Watchdog: No response for 15 seconds")
+                    timeSinceLastFrame > 150000 -> logger.debug("Watchdog: No response for 150 seconds")
                 }
 
                 delay(5000)
